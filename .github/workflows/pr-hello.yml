@@ -1,0 +1,49 @@
+name: hello-pr-test
+
+on:
+  pull_request:
+
+jobs:
+  hello-base:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Print from base branch
+        run: echo "Hello from the base branch"
+
+  hello-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Print from PR branch
+        run: echo "Hello from the pull request branch"
+
+  hello-merge-comment:
+    needs: [hello-base, hello-pr]
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate simulated diff output
+        run: echo "Simulated diff: Hello world!"
+      - name: Find existing comment
+        uses: peter-evans/find-comment@v3
+        id: find_comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: Hello world output
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v3
+        if: ${{ steps.find_comment.outputs.comment-id != null }}
+        with:
+          body: |
+            Hello world output:
+
+            ✅ Base branch and PR both said hello successfully!
+          edit-mode: replace
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.GITHUB_TOKEN }}
