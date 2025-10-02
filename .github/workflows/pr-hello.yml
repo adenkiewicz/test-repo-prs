@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Generate simulated diff output
-        run: echo "Simulated diff: Hello world!"
+        run: echo Simulated diff Hello world!
       - name: Find existing comment
         uses: peter-evans/find-comment@v3
         id: find_comment
